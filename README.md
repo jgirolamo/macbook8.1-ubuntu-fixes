@@ -22,10 +22,13 @@ A fresh Ubuntu install works, but this machine needs several Mac-specific and 8â
 ## Quick install (next Ubuntu install)
 
 ```bash
-git clone https://github.com/<you>/macbook8.1-ubuntu-fixes.git
+git clone git@github.com:YOUR_USER/macbook8.1-ubuntu-fixes.git
 cd macbook8.1-ubuntu-fixes
 sudo ./scripts/install-all.sh
 sudo reboot
+```
+
+Local copy on this machine: `~/Projects/macbook8.1-ubuntu-fixes`
 ```
 
 Or run steps one by one:
