@@ -1,0 +1,6 @@
+# Ignore local build artifacts
+*.aml
+*.dsl
+/build/
+*.log
+.DS_Store

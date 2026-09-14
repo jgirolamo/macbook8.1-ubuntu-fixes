@@ -1,0 +1,57 @@
+#!/bin/bash
+# Recover MacBook8,1 SPI keyboard/touchpad only when devices are missing.
+set -uo pipefail
+LOGTAG=applespi-recover
+
+log() { logger -t "$LOGTAG" "$*"; echo "$*"; }
+
+has_keyboard() {
+  grep -q 'Name=Apple SPI Keyboard' /proc/bus/input/devices 2>/dev/null
+}
+
+has_touchpad() {
+  grep -q 'Name=Apple SPI Touchpad' /proc/bus/input/devices 2>/dev/null
+}
+
+ok() { has_keyboard && has_touchpad; }
+
+reload_applespi() {
+  log "Reloading applespi"
+  modprobe -r applespi 2>/dev/null || true
+  sleep 1
+  modprobe applespi || true
+  sleep 2
+}
+
+# Wait for SPI ACPI device / input registration after boot.
+for _ in $(seq 1 20); do
+  if ok; then
+    log "Keyboard and touchpad present"
+    exit 0
+  fi
+  sleep 0.5
+done
+
+if ok; then
+  log "Keyboard and touchpad present"
+  exit 0
+fi
+
+log "SPI keyboard/touchpad missing; attempting recovery"
+for attempt in 1 2 3 4 5; do
+  reload_applespi
+  if ok; then
+    log "Recovery succeeded on attempt $attempt"
+    exit 0
+  fi
+  log "Attempt $attempt failed; waiting"
+  sleep 2
+done
+
+if ok; then
+  log "Devices present after retries"
+  exit 0
+fi
+
+log "Recovery failed; hold power 10s to hardware-reset the SPI controller"
+exit 1

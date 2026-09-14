@@ -1,0 +1,15 @@
+[Unit]
+Description=Recover Apple SPI keyboard/touchpad after boot
+After=multi-user.target graphical.target
+Wants=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/applespi-recover
+RemainAfterExit=yes
+TimeoutStartSec=90
+# Do not block boot on failure; hard power-off is the last resort.
+SuccessExitStatus=0 1
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Hard-reset applespi after suspend; MacBook8,1 SPI often stays wedged.
+case "$1/$2" in
+  post/suspend|post/hybrid-sleep)
+    logger -t applespi-resume "post-suspend: recovering SPI keyboard"
+    /usr/local/sbin/applespi-recover || true
+    ;;
+esac
