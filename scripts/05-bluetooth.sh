@@ -102,8 +102,9 @@ dsl = dsl[:crs] + new_crs + dsl[end + 1:]
 
 # Power-up + mux hint on init (GPIO36 selects BT vs SSD debug on MacBook8,1)
 if "Method (_INI" not in dsl[blth:blth + 3500]:
+    # iasl often inserts "// _STA: Status" between ) and { — allow any non-brace chars.
     sta = re.search(
-        r"(Device \(BLTH\)\s*\{[\s\S]*?Method \(_STA, 0, NotSerialized\)\s*\{[\s\S]*?\}\s*)",
+        r"(Device \(BLTH\)\s*\{[\s\S]*?Method \(_STA,\s*0,\s*NotSerialized\)[^{]*\{[\s\S]*?\}\s*)",
         dsl,
     )
     if not sta:

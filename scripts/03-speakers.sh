@@ -1,25 +1,29 @@
 #!/bin/bash
-# Restore CS4208 internal speaker pins on MacBook8,1 (SSID 106b:6400).
+# MacBook8,1 speakers: install the TDM/class-D DKMS stack (pin patches alone are not enough).
+# Upstream: https://github.com/thomas-shirley/macbook8.1-speaker-driver
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 [[ $(id -u) -eq 0 ]] || { echo "Run as root"; exit 1; }
+export DEBIAN_FRONTEND=noninteractive
 
-install -m 644 "$ROOT/configs/cs4208-macbook.fw" /lib/firmware/cs4208-macbook.fw
-install -m 644 "$ROOT/configs/macbook-cs4208.conf" /etc/modprobe.d/macbook-cs4208.conf
+apt-get install -y gcc make dkms wget git "linux-headers-$(uname -r)"
 
-# Live apply if codec sysfs is free
-if [[ -w /sys/class/sound/hwC1D0/reconfig ]]; then
-  systemctl --user -M "${SUDO_USER:-g}@.host" stop pipewire.socket pipewire.service pipewire-pulse.socket pipewire-pulse.service wireplumber.service 2>/dev/null || true
-  sleep 1
-  echo 0x10 0x032b401f >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 0x11 0x90170010 >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 0x12 0x90170011 >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 0x13 0x90170012 >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 0x14 0x90170014 >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 0x1d 0x400000f0 >/sys/class/sound/hwC1D0/user_pin_configs
-  echo 1 >/sys/class/sound/hwC1D0/reconfig || true
-  systemctl --user -M "${SUDO_USER:-g}@.host" start pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null || true
-  amixer -c PCH set Master 80% unmute >/dev/null 2>&1 || true
+SRC=/usr/local/src/macbook8.1-speaker-driver
+if [[ ! -d "$SRC/.git" ]]; then
+  rm -rf "$SRC"
+  git clone --depth 1 https://github.com/thomas-shirley/macbook8.1-speaker-driver.git "$SRC"
+else
+  git -C "$SRC" pull --ff-only || true
 fi
 
-echo "03-speakers done (reboot applies patch= firmware reliably)"
+# Pin-only firmware patch fights the real TDM driver — keep it disabled.
+if [[ -f /etc/modprobe.d/macbook-cs4208.conf ]]; then
+  mv -f /etc/modprobe.d/macbook-cs4208.conf /etc/modprobe.d/macbook-cs4208.conf.disabled-pinonly
+fi
+rm -f /etc/wireplumber/wireplumber.conf.d/51-macbook8-speakers.conf
+
+cd "$SRC"
+bash install.sh
+
+echo "03-speakers done via macbook8.1-speaker-driver. Reboot required."
+echo "After reboot, play to sink input.MacBook_Speaker (should be default)."

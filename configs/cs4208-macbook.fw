@@ -1,3 +1,4 @@
+# Improve CS4208: keep 4 speaker pins + disable jack automute quirks
 [codec]
 0x10134208 0x106b6400 0
 
@@ -8,3 +9,9 @@
 0x13 0x90170012
 0x14 0x90170014
 0x1d 0x400000f0
+
+[hint]
+jack_detect = no
+auto_mute = no
+auto_mic = no
+inv_jack_detect = no

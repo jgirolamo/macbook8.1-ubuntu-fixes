@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=MacBook Battery
+Comment=AlDente-style charge limit and battery health dashboard
+Exec=macbook-battery
+Icon=battery-level-80-charging-symbolic
+Terminal=false
+Type=Application
+Categories=Utility;System;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Write SMC charge limit (BCLM) via sysfs. Invoked through pkexec.
+set -euo pipefail
+VAL="${1:-}"
+[[ "$VAL" =~ ^[0-9]+$ ]] || { echo "usage: macbook-bclm <20-100>" >&2; exit 2; }
+(( VAL >= 20 && VAL <= 100 )) || { echo "value out of range" >&2; exit 2; }
+TARGET=/sys/class/power_supply/BAT0/charge_control_end_threshold
+[[ -e "$TARGET" ]] || { echo "charge_control_end_threshold missing (applesmc-next?)" >&2; exit 1; }
+printf '%s\n' "$VAL" >"$TARGET"
+cat "$TARGET"

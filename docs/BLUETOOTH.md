@@ -14,40 +14,54 @@ Two ACPI serdev children share that UART:
 
 Linux serdev only allows **one** slave per UART, so SSDC wins and Bluetooth never binds — unless SSDC `_STA` is forced to `Zero` via a DSDT override (early initrd).
 
-## Fixes in `05-bluetooth.sh`
+## What works (validated)
 
-1. **DSDT override** (`/boot/acpi_override_ssdc.img`)
-   - `SSDC._STA → Zero`
-   - `BLTH._CRS` always returns UART resources (stock DSDT returns a Darwin-only stub when Linux sets `_OSI("Darwin")` on Apple hardware)
-   - `BLTH._INI` powers the chip (`BTPU`/`BTRS`) and sets PCH **GPIO36** mux toward BT
+After `05-bluetooth.sh` + `05b-bluetooth-crs.sh` and a reboot:
+
+- `hci0` is **UP RUNNING** with a real BD address
+- `bluetoothctl list` shows the controller
+- dmesg may still log `Failed to set baudrate (-16)` and missing `brcm/BCM.hcd` — that is OK on this machine; the chip still initializes
+
+## Fixes
+
+### `05-bluetooth.sh`
+
+1. **DSDT override** (`/boot/acpi_override_ssdc.img`) — hide SSDC, patch CRS/`_INI`
 2. **GRUB** `GRUB_EARLY_INITRD_LINUX_CUSTOM=acpi_override_ssdc.img`
 3. **DKMS** [leifliddy/macbook12-bluetooth-driver](https://github.com/leifliddy/macbook12-bluetooth-driver) patched `hci_uart`
+
+### `05b-bluetooth-crs.sh`
+
+Rebuilds the override without reinstalling DKMS:
+
+- `SSDC._STA → Zero`
+- `BLTH._CRS` always returns UART resources (stock DSDT returns a Darwin-only stub when Linux sets `_OSI("Darwin")`)
+- `BLTH._INI` powers the chip (`BTPU`/`BTRS`/`BTLP`) and sets PCH **GPIO36** mux toward BT
+
+Run **05b after 05** (or alone if DKMS is already installed). Reboot required.
 
 ## Verify after reboot
 
 ```bash
-# Override applied?
 journalctl -b -k | grep 'Table Upgrade'
-
-# Bound to Bluetooth, not SSDC?
 cat /sys/bus/serial/devices/serial0-0/firmware_node/path
 # expect: \_SB_.PCI0.URT0.BLTH
 
 rfkill list
-hciconfig -a
+hciconfig -a          # UP RUNNING, non-zero BD address
 bluetoothctl list
 ```
 
 ## If still DOWN
 
-Symptoms we still saw: `No reset resource`, `failed to write update baudrate (-110)`.
-
-Things to try:
-
-1. Confirm patched module: `modinfo -n hci_uart` should be under `updates/dkms/`
-2. Confirm `_CRS` patch took (no Darwin stub) by rebuilding override from this repo’s script
-3. Try the other GPIO36 polarity in DSDT (`GP36 = Zero` instead of `One`)
-4. Extract Broadcom BT `.hcd` firmware from macOS / Boot Camp if the driver requests it
+1. Confirm patched module: `modinfo -n hci_uart` → under `updates/dkms/`
+2. Flip GPIO36 mux polarity, rebuild, reboot:
+   ```bash
+   echo Zero | sudo tee /etc/macbook-bt-mux
+   sudo ./scripts/05b-bluetooth-crs.sh
+   sudo reboot
+   ```
+3. Optional: extract Broadcom BT `.hcd` from macOS / Boot Camp if you want to silence the firmware warning
 
 ## Uninstall override
 

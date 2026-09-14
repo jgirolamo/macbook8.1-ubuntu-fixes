@@ -9,6 +9,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/03-speakers.sh"
 "$ROOT/scripts/04-applespi.sh"
 "$ROOT/scripts/05-bluetooth.sh"
+"$ROOT/scripts/05b-bluetooth-crs.sh"
+"$ROOT/scripts/06-opencore-labels.sh"
+"$ROOT/scripts/07-battery-dashboard.sh"
 
 echo
 echo "All steps finished. Reboot now:"
