@@ -3,11 +3,12 @@
 # See docs/BLUETOOTH.md — may still need CRS/mux follow-up on MacBook8,1.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=_lib.sh
+. "$ROOT/scripts/_lib.sh"
 [[ $(id -u) -eq 0 ]] || { echo "Run as root"; exit 1; }
-export DEBIAN_FRONTEND=noninteractive
 
-apt-get update -qq
-apt-get install -y acpica-tools cpio dkms gcc make git wget xz-utils build-essential linux-headers-$(uname -r)
+apt-get update -qq || echo "WARN: apt-get update failed (offline?) — continuing if packages present"
+apt_install acpica-tools cpio dkms gcc make git wget xz-utils build-essential "linux-headers-$(uname -r)"
 
 WORK=/var/lib/macbook-bt-ssdc
 IMG=/boot/acpi_override_ssdc.img
@@ -167,11 +168,8 @@ fi
 
 # DKMS Broadcom UART with Apple ACPI power methods
 SRC=/usr/local/src/macbook12-bluetooth-driver
-mkdir -p /usr/local/src
-if [[ ! -d $SRC/.git ]]; then
-  rm -rf "$SRC"
-  git clone --depth 1 https://github.com/leifliddy/macbook12-bluetooth-driver.git "$SRC"
-fi
+install_vendor_src macbook12-bluetooth-driver "$SRC" \
+  https://github.com/leifliddy/macbook12-bluetooth-driver.git
 cd "$SRC"
 chmod +x install.bluetooth.sh dkms.sh
 ./install.bluetooth.sh -i || ./install.bluetooth.sh || true

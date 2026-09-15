@@ -2,21 +2,31 @@
 # Install AlDente-style MacBook battery dashboard + applesmc-next charge limit.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=_lib.sh
+. "$ROOT/scripts/_lib.sh"
 [[ $(id -u) -eq 0 ]] || { echo "Run as root: sudo $0"; exit 1; }
-export DEBIAN_FRONTEND=noninteractive
 
-apt-get install -y \
+apt_install \
   dkms "linux-headers-$(uname -r)" \
   python3-gi python3-gi-cairo python3-cairo \
   gir1.2-gtk-4.0 gir1.2-adw-1 \
   gir1.2-ayatanaappindicator3-0.1 libnotify-bin \
   curl ca-certificates
 
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
-curl -fsSL -o "$TMP/applesmc.deb" \
-  https://github.com/netlinux-ai/applesmc-next/releases/download/v9-dualsuite/applesmc-next-dkms_0.1.6-9netlinux1.resolute1_all.deb
-dpkg -i "$TMP/applesmc.deb" || apt-get install -fy
+DEB=$(echo "$ROOT"/vendor/applesmc-next/applesmc-next-dkms_*.deb)
+if [[ ! -f "$DEB" ]]; then
+  if [[ "${ALLOW_NETWORK_FALLBACK:-0}" == 1 ]]; then
+    TMP=$(mktemp -d)
+    trap 'rm -rf "$TMP"' EXIT
+    curl -fsSL -o "$TMP/applesmc.deb" \
+      https://github.com/netlinux-ai/applesmc-next/releases/download/v9-dualsuite/applesmc-next-dkms_0.1.6-9netlinux1.resolute1_all.deb
+    DEB="$TMP/applesmc.deb"
+  else
+    echo "ERROR: vendor/applesmc-next/*.deb missing. Run scripts/vendor-refresh.sh or set ALLOW_NETWORK_FALLBACK=1." >&2
+    exit 1
+  fi
+fi
+dpkg -i "$DEB" || apt-get install -fy
 
 # Reload so charge_control_end_threshold appears
 modprobe -r applesmc sbs 2>/dev/null || true

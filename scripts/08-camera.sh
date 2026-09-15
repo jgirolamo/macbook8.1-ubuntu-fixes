@@ -2,19 +2,17 @@
 # FaceTime HD camera on MacBook8,1 — IOMMU off + patched facetimehd DKMS.
 # Upstream: https://github.com/thomas-shirley/macbook8.1-camera
 set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=_lib.sh
+. "$ROOT/scripts/_lib.sh"
 [[ $(id -u) -eq 0 ]] || { echo "Run as root"; exit 1; }
-export DEBIAN_FRONTEND=noninteractive
 
-apt-get install -y git make gcc dkms curl cpio xz-utils "linux-headers-$(uname -r)" \
+apt_install git make gcc dkms curl cpio xz-utils "linux-headers-$(uname -r)" \
   ffmpeg v4l-utils
 
 SRC=/usr/local/src/macbook8.1-camera
-if [[ ! -d "$SRC/.git" ]]; then
-  rm -rf "$SRC"
-  git clone --depth 1 https://github.com/thomas-shirley/macbook8.1-camera.git "$SRC"
-else
-  git -C "$SRC" pull --ff-only || true
-fi
+install_vendor_src macbook8.1-camera "$SRC" \
+  https://github.com/thomas-shirley/macbook8.1-camera.git
 
 cd "$SRC"
 bash enable-iommu-off.sh

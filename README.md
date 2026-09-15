@@ -30,6 +30,11 @@ sudo ./scripts/install-all.sh
 sudo reboot
 ```
 
+Speaker / Bluetooth / camera DKMS sources and the `applesmc-next` `.deb` live under
+`vendor/` (no GitHub clones at install time). You still need **apt** once for
+build tools and kernel headers (`gcc`, `dkms`, `linux-headers-$(uname -r)`, etc.).
+Refresh vendored trees online with `./scripts/vendor-refresh.sh`.
+
 Repo: https://github.com/jgirolamo/macbook8.1-ubuntu-fixes  
 Local copy: `~/Projects/macbook8.1-ubuntu-fixes`
 
@@ -71,6 +76,7 @@ ls /dev/video0 && ffplay /dev/video0 # FaceTime HD
 
 ```
 apps/        MacBook Battery dashboard
+vendor/      upstream DKMS trees + applesmc-next .deb
 configs/     drop-in files installed by the scripts
 scripts/     installers (idempotent where possible)
 docs/        deeper notes (Bluetooth, OpenCore)

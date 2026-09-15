@@ -1,0 +1,26 @@
+# --- Proprietary Apple data (kept locally, never redistributed) ---
+# Extracted firmware/driver blobs and the Boot Camp ESD cache used to obtain
+# them. These are Apple-copyrighted; every user must extract their own.
+bootcamp/
+sys_extract/
+facetimehd-firmware/firmware.bin
+facetimehd-firmware/AppleCameraInterface
+bcwc_pcie/firmware/firmware.bin
+bcwc_pcie/firmware/AppleCameraInterface
+
+# --- Kernel module build artifacts ---
+*.o
+*.ko
+*.mod
+*.mod.c
+.*.cmd
+Module.symvers
+modules.order
+.tmp_versions/
+
+# --- Diagnostic / test output ---
+*.log
+*.raw
+
+# --- Local editor / tooling state ---
+.claude/settings.local.json

@@ -3,18 +3,15 @@
 # Upstream: https://github.com/thomas-shirley/macbook8.1-speaker-driver
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=_lib.sh
+. "$ROOT/scripts/_lib.sh"
 [[ $(id -u) -eq 0 ]] || { echo "Run as root"; exit 1; }
-export DEBIAN_FRONTEND=noninteractive
 
-apt-get install -y gcc make dkms wget git "linux-headers-$(uname -r)"
+apt_install gcc make dkms wget git "linux-headers-$(uname -r)"
 
 SRC=/usr/local/src/macbook8.1-speaker-driver
-if [[ ! -d "$SRC/.git" ]]; then
-  rm -rf "$SRC"
-  git clone --depth 1 https://github.com/thomas-shirley/macbook8.1-speaker-driver.git "$SRC"
-else
-  git -C "$SRC" pull --ff-only || true
-fi
+install_vendor_src macbook8.1-speaker-driver "$SRC" \
+  https://github.com/thomas-shirley/macbook8.1-speaker-driver.git
 
 # Pin-only firmware patch fights the real TDM driver — keep it disabled.
 if [[ -f /etc/modprobe.d/macbook-cs4208.conf ]]; then
