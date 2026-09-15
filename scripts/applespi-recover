@@ -5,12 +5,13 @@ LOGTAG=applespi-recover
 
 log() { logger -t "$LOGTAG" "$*"; echo "$*"; }
 
+# /proc/bus/input/devices uses: N: Name="Apple SPI Keyboard"
 has_keyboard() {
-  grep -q 'Name=Apple SPI Keyboard' /proc/bus/input/devices 2>/dev/null
+  grep -qE 'Name="Apple SPI Keyboard"' /proc/bus/input/devices 2>/dev/null
 }
 
 has_touchpad() {
-  grep -q 'Name=Apple SPI Touchpad' /proc/bus/input/devices 2>/dev/null
+  grep -qE 'Name="Apple SPI Touchpad"' /proc/bus/input/devices 2>/dev/null
 }
 
 ok() { has_keyboard && has_touchpad; }
@@ -20,11 +21,12 @@ reload_applespi() {
   modprobe -r applespi 2>/dev/null || true
   sleep 1
   modprobe applespi || true
-  sleep 2
+  # modeswitch can take a few seconds
+  sleep 3
 }
 
-# Wait for SPI ACPI device / input registration after boot.
-for _ in $(seq 1 20); do
+# Wait for SPI input registration after boot (up to ~30s).
+for _ in $(seq 1 60); do
   if ok; then
     log "Keyboard and touchpad present"
     exit 0

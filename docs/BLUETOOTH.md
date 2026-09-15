@@ -72,3 +72,13 @@ sudo update-grub
 # optional: sudo /usr/local/src/macbook12-bluetooth-driver/install.bluetooth.sh -u
 sudo reboot
 ```
+
+## Choppy A2DP audio
+
+On this UART Bluetooth chip, AAC can underrun. Mitigations already in the repo/user configs:
+
+1. Prefer **SBC-XQ** (`~/.config/wireplumber/.../52-bluez-a2dp.conf`)
+2. Larger PipeWire quantum (`52-bt-smooth.conf`)
+3. DSDT `_CRS` baud **3000000** (`0x002DC6C0`) so the host UART matches Apple — reboot after `05b-bluetooth-crs.sh`
+
+Also keep Wi‑Fi on **5 GHz** when possible (same BCM4350 radio).

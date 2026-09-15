@@ -64,7 +64,7 @@ new_crs = """Method (_CRS, 0, NotSerialized)
                     {
                         Name (UBUF, ResourceTemplate ()
                         {
-                            UartSerialBusV2 (0x0001C200, DataBitsEight, StopBitsOne,
+                            UartSerialBusV2 (0x002DC6C0, DataBitsEight, StopBitsOne,
                                 0xC0, LittleEndian, ParityTypeNone, FlowControlHardware,
                                 0x0020, 0x0020, \"\\\\_SB.PCI0.URT0\",
                                 0x00, ResourceProducer, , Exclusive,

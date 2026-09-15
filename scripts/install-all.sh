@@ -12,6 +12,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/05b-bluetooth-crs.sh"
 "$ROOT/scripts/06-opencore-labels.sh"
 "$ROOT/scripts/07-battery-dashboard.sh"
+"$ROOT/scripts/08-camera.sh"
 
 echo
 echo "All steps finished. Reboot now:"

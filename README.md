@@ -18,6 +18,7 @@ A fresh Ubuntu install works, but this machine needs several Mac-specific and 8�
 | Speakers | CS4208 TDM amp silent | DKMS [macbook8.1-speaker-driver](https://github.com/thomas-shirley/macbook8.1-speaker-driver) |
 | Bluetooth | SSDC steals UART; Darwin `_CRS` stub | DSDT override (`05`/`05b`) + DKMS `hci_uart` |
 | Battery | No charge ceiling (AlDente) | `applesmc-next` + **MacBook Battery** dashboard |
+| Camera | FaceTime HD silent / green | Patched `facetimehd` + `intel_iommu=off` |
 | OpenCore | Two generic “EFI” tiles | Labels/icons via `06-opencore-labels.sh` |
 
 ## Quick install (next Ubuntu install)
@@ -43,6 +44,7 @@ sudo ./scripts/05-bluetooth.sh         # SSDC DSDT + DKMS hci_uart
 sudo ./scripts/05b-bluetooth-crs.sh    # BLTH _CRS + mux/_INI (required)
 sudo ./scripts/06-opencore-labels.sh   # Ubuntu / Linux picker names (optional)
 sudo ./scripts/07-battery-dashboard.sh # charge limit + dashboard
+sudo ./scripts/08-camera.sh            # FaceTime HD (iommu off)
 sudo reboot
 ```
 
@@ -54,6 +56,7 @@ cat /sys/power/mem_sleep             # [s2idle]
 bluetoothctl list                    # controller present, UP
 wpctl status | grep -i MacBook       # input.MacBook_Speaker
 macbook-battery                      # charge-limit dashboard
+ls /dev/video0 && ffplay /dev/video0 # FaceTime HD
 ```
 
 ## Hardware notes
@@ -75,11 +78,11 @@ docs/        deeper notes (Bluetooth, OpenCore)
 
 ## Status / known gaps
 
-Validated working on this machine after reboot: **speakers**, **Bluetooth**, **battery charge limit**, **OpenCore Ubuntu/Linux labels**.
+Validated working on this machine after reboot: **speakers**, **Bluetooth**, **battery charge limit**, **OpenCore Ubuntu/Linux labels**, **FaceTime camera** (after `08-camera` + reboot).
 
-- **Camera**: FaceTime HD needs `facetimehd` DKMS + firmware (not automated here yet).
 - **SPI keyboard**: if dead after soft reboot, **Shut Down** or hold power ~10 s.
 - **BT firmware**: dmesg may show missing `brcm/BCM.hcd` and a benign baud-change `-16`; controller still comes UP.
+- **Camera colours**: optional `1675_01XX.dat` calibration — see `docs/CAMERA.md`.
 
 ## License
 
