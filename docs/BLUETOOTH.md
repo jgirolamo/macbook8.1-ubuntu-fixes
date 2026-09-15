@@ -75,10 +75,10 @@ sudo reboot
 
 ## Choppy A2DP audio
 
-On this UART Bluetooth chip, AAC can underrun. Mitigations already in the repo/user configs:
+On this UART Bluetooth chip, AAC can underrun. `05-bluetooth.sh` / `05b` install:
 
-1. Prefer **SBC-XQ** (`~/.config/wireplumber/.../52-bluez-a2dp.conf`)
-2. Larger PipeWire quantum (`52-bt-smooth.conf`)
-3. DSDT `_CRS` baud **3000000** (`0x002DC6C0`) so the host UART matches Apple — reboot after `05b-bluetooth-crs.sh`
+1. Prefer **SBC-XQ** — `configs/wireplumber/52-bluez-a2dp.conf` → `/etc/wireplumber/...` and `~/.config/...`
+2. Larger PipeWire quantum — `configs/pipewire/52-bt-smooth.conf`
+3. DSDT `_CRS` baud **3000000** (`0x002DC6C0`) so the host UART matches Apple — reboot after `05b`
 
 Also keep Wi‑Fi on **5 GHz** when possible (same BCM4350 radio).

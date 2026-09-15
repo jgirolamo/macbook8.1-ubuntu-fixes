@@ -16,7 +16,7 @@ A fresh Ubuntu install works, but this machine needs several Mac-specific and 8�
 | Sleep | S3 `deep` hangs / kills SPI | Force `s2idle` |
 | Keyboard | SPI timeouts after reboot | Delay load + recover service |
 | Speakers | CS4208 TDM amp silent | DKMS [macbook8.1-speaker-driver](https://github.com/thomas-shirley/macbook8.1-speaker-driver) |
-| Bluetooth | SSDC steals UART; Darwin `_CRS` stub | DSDT override (`05`/`05b`) + DKMS `hci_uart` |
+| Bluetooth | SSDC / Darwin `_CRS` / choppy A2DP | DSDT (`05`/`05b`) + DKMS + SBC-XQ PipeWire configs |
 | Battery | No charge ceiling (AlDente) | `applesmc-next` + **MacBook Battery** dashboard |
 | Camera | FaceTime HD silent / green | Patched `facetimehd` + `intel_iommu=off` |
 | OpenCore | Two generic “EFI” tiles | Labels/icons via `06-opencore-labels.sh` |

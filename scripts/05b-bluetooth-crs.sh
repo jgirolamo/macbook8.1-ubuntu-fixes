@@ -131,4 +131,22 @@ cp dsdt.aml overlay/kernel/firmware/acpi/dsdt.aml
 cp dsdt.dsl dsdt.aml "$WORK/"
 install -m 644 "$ROOT/configs/macbook-bt.cfg" /etc/default/grub.d/macbook-bt.cfg
 update-grub
+
+# Keep A2DP configs in sync when only rebuilding the DSDT
+install -d /etc/pipewire/pipewire.conf.d /etc/wireplumber/wireplumber.conf.d
+install -m 644 "$ROOT/configs/pipewire/52-bt-smooth.conf" /etc/pipewire/pipewire.conf.d/52-bt-smooth.conf
+install -m 644 "$ROOT/configs/wireplumber/52-bluez-a2dp.conf" /etc/wireplumber/wireplumber.conf.d/52-bluez-a2dp.conf
+if [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != root ]]; then
+  UH=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+  install -d -o "$SUDO_USER" -g "$SUDO_USER" -m 755 \
+    "$UH/.config/pipewire/pipewire.conf.d" \
+    "$UH/.config/wireplumber/wireplumber.conf.d"
+  install -o "$SUDO_USER" -g "$SUDO_USER" -m 644 \
+    "$ROOT/configs/pipewire/52-bt-smooth.conf" \
+    "$UH/.config/pipewire/pipewire.conf.d/52-bt-smooth.conf"
+  install -o "$SUDO_USER" -g "$SUDO_USER" -m 644 \
+    "$ROOT/configs/wireplumber/52-bluez-a2dp.conf" \
+    "$UH/.config/wireplumber/wireplumber.conf.d/52-bluez-a2dp.conf"
+fi
+
 echo "Bluetooth DSDT updated. Reboot required."
